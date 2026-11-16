@@ -48,35 +48,12 @@ python -m possession.run
 ```
 That writes `possession.csv` (199,319 rows of `frame,label`) in a few seconds. The first run also saves a parsed copy of the tracking under `<data dir>/cache/`, which makes later runs faster.
 
-To write it straight under your team name for the submission form:
-```bash
-python -m possession.run --out <team_name>.csv
-```
-
 Check the file with the organisers' validator:
 ```bash
 python evaluation/validate_submission.py possession.csv
 ```
 
-To score it on the public five minutes, copy the ground truth in from the challenge repository first (we don't redistribute it). Treat this as a sanity check, not a leaderboard:
-```bash
-cp <challenge-repo>/evaluation/gt/BAR-ATH_possession_gt_public* evaluation/gt/
-mkdir -p evaluation/results && cp possession.csv evaluation/results/
-python evaluation/run_evaluation.py
-```
-
-If you want to see what each piece contributes, you can switch parts off and run the full-match checks:
-```bash
-python -m possession.run --no-shape --out evaluation/results/no_shape.csv
-python -m possession.run --team-priors --out evaluation/results/team_priors.csv
-python -m possession.proxy_eval evaluation/results/*.csv
-```
-
-The full write-up (approach, what we used and dropped, the possession rules, limitations) is in [docs/TECHNICAL.md](docs/TECHNICAL.md), with a PDF copy at `docs/TECHNICAL.pdf`. To rebuild the PDF you need Chrome or Edge installed:
-```bash
-pip install -r docs/requirements-docs.txt
-python docs/build_pdf.py --out <team_name>.pdf
-```
+The full write-up (approach, what we used and dropped, the possession rules, limitations) is in [docs/TECHNICAL.md](docs/TECHNICAL.md).
 
 ## Results and training metrics
 
@@ -84,6 +61,7 @@ All the numbers in this section come out of one command, so you can check them y
 ```bash
 python -m possession.report
 ```
+Section 4 needs the public ground truth, which we don't redistribute. Copy `BAR-ATH_possession_gt_public.csv` from the challenge repository into `evaluation/gt/` first.
 
 Two things to keep in mind when reading them:
 - **Nothing here was trained on labels from this match.** The rules don't allow it, and we didn't. The only part that learns is the team-shape model (section 2), and it learns from the pipeline's own guesses. Each half is always scored by a model that was trained on the other half.
@@ -223,17 +201,9 @@ solution/
 │     ├─ align.py                lines up the broadcast tracking with the tactical video
 │     └─ build_broadcast_ball.py caches the aligned broadcast ball
 ├─ evaluation/                   the organisers' scorer and validator, untouched
-│  └─ gt/                        put the public ground truth here (see Usage); not committed
-└─ docs/
-   ├─ TECHNICAL.md               the technical write-up
-   ├─ TECHNICAL.pdf              the same, as submitted
-   ├─ pipeline.svg               the diagram at the top of this page
-   ├─ build_pdf.py               turns TECHNICAL.md into the PDF
-   └─ requirements-docs.txt      what build_pdf.py needs
+│  └─ gt/                        put the public ground truth here; not committed
+└─ docs/                        the technical write-up (Markdown and PDF) and the diagram above
 ```
-
-## Contributing
-Pull requests are welcome. For bigger changes, please open an issue first so we can talk about what you'd like to change.
 
 ## License
 Our code is released under the [MIT](https://choosealicense.com/licenses/mit/) License. `games.py` and everything in `evaluation/` come from the organisers' repository, which is also MIT (see `LICENSE-organisers-MIT`). Neither licence covers the match data.
