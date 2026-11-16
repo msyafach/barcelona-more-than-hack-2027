@@ -21,3 +21,7 @@ docs/TECHNICAL.html
 .venv/
 __pycache__/
 *.py[cod]
+
+# Submission files: uploaded through the form, rebuilt locally, not kept in the repository
+possession.csv
+docs/TECHNICAL.pdf

@@ -188,7 +188,6 @@ solution/
 ├─ LICENSE-organisers-MIT        MIT, for games.py and evaluation/ (from the organisers)
 ├─ requirements.txt              pinned numpy and pandas
 ├─ games.py                      match constants and data paths (from the organisers; it has to stay at the root)
-├─ possession.csv                the submission; python -m possession.run rebuilds it
 ├─ possession/                   the pipeline
 │  ├─ run.py                     start here: builds possession.csv
 │  ├─ io.py                      reads the tracking and Smart Tagging into cached numpy arrays
@@ -202,7 +201,7 @@ solution/
 │     └─ build_broadcast_ball.py caches the aligned broadcast ball
 ├─ evaluation/                   the organisers' scorer and validator, untouched
 │  └─ gt/                        put the public ground truth here; not committed
-└─ docs/                        the technical write-up (Markdown and PDF) and the diagram above
+└─ docs/                        the technical write-up and the diagram above
 ```
 
 ## License
