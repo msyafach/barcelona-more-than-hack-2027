@@ -1,6 +1,6 @@
 """Align the broadcast ATD to the tactical timeline and cache its ball on tactical frames.
 
-    python -m possession.build_broadcast_ball
+    python -m possession.experimental.build_broadcast_ball
 """
 
 import os
@@ -9,7 +9,7 @@ import time
 import numpy as np
 
 from . import align
-from .io import cache_dir, load_tracking
+from ..io import cache_dir, load_tracking
 
 PATH = os.path.join(cache_dir(), "BAR-ATH_broadcast_ball_on_tactical.npz")
 

@@ -61,7 +61,7 @@ No labelled data of any kind is used. Nothing comes from the provided game's gro
 
 The only learned component (the team-shape model) is trained on pseudo-labels that the pipeline itself produces from the tracking: frames where the ball is visible and one team is clearly on it. It is cross-fitted. The model applied to the first half is trained on the second half, and the other way round.
 
-The 5-minute public ground truth was used only to check the pipeline: frame alignment, label meaning, and to find structural bugs from aggregate statistics. No parameter was grid-searched against it. It has 17 possessions, and the organisers' bootstrap puts its noise band at about 0.33 spellF1, so it could not rank variants anyway.
+The 5-minute public ground truth was used only to check the pipeline: frame alignment, label meaning, and aggregate diagnostics. No parameter was grid-searched against it and no constant is tied to a frame of the game. For transparency: two design changes were prompted by what those diagnostics showed. One was the v1 bug where a player standing over a dead ball counted as play. The other was late possession changes, which led to graded control. Both are justified on their own terms in section 4. It has 17 possessions, and the organisers' bootstrap puts its noise band at about 0.33 spellF1, so it cannot rank variants.
 
 ## 4. Possession rules implemented
 
@@ -118,7 +118,7 @@ The submitted file has 338 possessions with a mean of 10.4 s, a dead-ball share 
 
 ## 6. Tried and dropped
 
-**Smart Tagging phase teams as priors.** Build Up, Progression and similar phases imply a team in possession, and Defending phases imply the other team. Adding them as weak evidence lowered every check that was not contaminated by them. Public macroF1 went from 0.874 to 0.861, 0.845 and 0.806 at weights 0.01, 0.02 and 0.05. This is consistent with the organisers' note that phases are not possessions.
+**Smart Tagging phase teams as priors.** Build Up, Progression and similar phases imply a team in possession, and Defending phases imply the other team. We dropped them because phases are not possessions (the organisers say so in DATA.md), and because no independent full-match check could support them: our Smart Tagging agreement check uses the same tags, so it would only grade its own input. For transparency, the public window moved the same way (macroF1 0.874 to 0.861, 0.845 and 0.806 at weights 0.01, 0.02 and 0.05), but it cannot rank variants and was not the reason.
 
 **Broadcast ATD.** We aligned the broadcast tracking to the tactical timeline. Each 5 s window of broadcast frames is matched to the tactical offset where every visible broadcast player has a same-team tactical player nearby. The window is tracked locally and re-acquired after cuts and replays. 838 of 902 windows aligned, with a median player mismatch of about 0.25 m. But the broadcast ball:
 
@@ -129,7 +129,7 @@ Using it left every check unchanged and raised the possession count from 338 to 
 
 ## 7. Limitations
 
-- **Team errors with the ball visible.** Some come from tracklets whose team assignment looks wrong over a stretch: a slot of one team sits on the ball while the other team is in possession. A jersey-colour check on the video would fix this, and it is the first thing we would add.
+- **Team errors with the ball visible.** On the public window, stretches remain where a player of one team is nearest the ball while the reference gives possession to the other team. Proximity alone does not capture the reference's notion of "owning" the ball at those moments, which may change at the pass rather than at the reception. Modelling ball trajectories (where a pass starts and ends) is what we would add next.
 - **Transition timing.** On the public window only 20% of possession changes are within 0.5 s. Timing at the start of a possession drives the higher IoU thresholds of `spellF1`.
 - **Fouls with the ball in play.** Stoppages without the ball leaving the pitch and without a set-piece tag are detected only through collective walking. Short ones (about 5 s) are often missed.
 - **Hand-set constants.** All constants are set from football reasoning rather than learned. With labelled data from other matches they could be calibrated properly. The rules allow that, and we did not have it.

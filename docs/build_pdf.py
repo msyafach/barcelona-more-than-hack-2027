@@ -1,7 +1,7 @@
-"""Render TECHNICAL.md to HTML (black-and-white Mermaid, orthogonal edges) and print it to PDF.
+"""Render docs/TECHNICAL.md to HTML (black-and-white Mermaid, orthogonal edges) and print it to PDF.
 
     pip install -r docs/requirements-docs.txt
-    python docs/build_pdf.py                     # -> TECHNICAL.html, TECHNICAL.pdf
+    python docs/build_pdf.py                     # -> docs/TECHNICAL.pdf
     python docs/build_pdf.py --out <team_name>.pdf
 
 Needs an installed Chrome or Edge for the headless print, and network access for mermaid.js.
@@ -17,7 +17,6 @@ import subprocess
 import markdown
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-ROOT = os.path.dirname(HERE)
 
 MERMAID = "https://cdn.jsdelivr.net/npm/mermaid@11.6.0/dist/mermaid.min.js"
 
@@ -92,8 +91,8 @@ def find_browser():
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
-    parser.add_argument("--src", default=os.path.join(ROOT, "TECHNICAL.md"))
-    parser.add_argument("--out", default=os.path.join(ROOT, "TECHNICAL.pdf"))
+    parser.add_argument("--src", default=os.path.join(HERE, "TECHNICAL.md"))
+    parser.add_argument("--out", default=os.path.join(HERE, "TECHNICAL.pdf"))
     parser.add_argument("--html-only", action="store_true")
     args = parser.parse_args()
 

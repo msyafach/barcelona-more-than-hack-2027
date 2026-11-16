@@ -9,20 +9,19 @@ import os
 
 import numpy as np
 
-from . import features, model
-from . import shape
+from . import features, model, shape
 from .io import GAME, ROOT, attack_direction_first_half, load_smart_tagging, load_tracking
 from games import half_video_blocks, require
 
 
 def build(params=None, use_team_priors=False, use_tagging=True, use_shape=True,
-          use_broadcast=False):
+          use_broadcast=False, report=None):
     """Two passes: the first gives pseudo-labels for the self-supervised shape model, the second
     decodes with shape evidence added in the frames the ball does not inform."""
     tracking = load_tracking()
     extra = None
     if use_broadcast:
-        from . import build_broadcast_ball
+        from .experimental import build_broadcast_ball
         extra = build_broadcast_ball.load()
     f = features.compute(tracking, extra_ball=extra)
     events = load_smart_tagging() if use_tagging else ()
@@ -33,7 +32,8 @@ def build(params=None, use_team_priors=False, use_tagging=True, use_shape=True,
     p = dict(model.PARAMS, **(params or {}))
     cH, cA = model.control_evidence(f, p)
     home_dir = attack_direction_first_half(require(["atd_meta"])[0])[0]
-    logit = shape.gap_evidence(tracking, f, halves, home_dir, cH, cA, np.isin(first, ["H", "A"]))
+    logit = shape.gap_evidence(tracking, f, halves, home_dir, cH, cA, np.isin(first, ["H", "A"]),
+                               report=report)
     return model.label(f, halves, events, params, use_team_priors, shape_logit=logit)
 
 

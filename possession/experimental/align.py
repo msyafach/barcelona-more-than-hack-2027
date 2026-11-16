@@ -14,16 +14,16 @@ instant, but it is only ever used to fill frames tactical cannot see.
 
 import numpy as np
 
-from .features import LENGTH, WIDTH
+from ..features import LENGTH, WIDTH
 
 STEP = 5             # broadcast frames between samples inside a window
 WIN = 25             # samples per window (125 frames = 5 s)
 MIN_PLAYERS = 6      # broadcast players needed in a sample for it to count
 LOCAL = 125          # local search, +/- frames around the previous offset
 GOOD = 1.2           # m: median one-sided NN distance accepted as a match
-FRAME_GOOD = 1.5
+FRAME_GOOD = 1.5     # m: per-frame check before a broadcast ball is used
 BACK = 3000          # frames a replay may map back
-AHEAD = 30000        # frames the feed may skip forward (halftime)     # m: per-frame check before a broadcast ball is used
+AHEAD = 30000        # frames the feed may skip forward (halftime)
 
 
 def _xy(players):

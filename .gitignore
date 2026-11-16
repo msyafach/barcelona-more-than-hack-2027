@@ -1,19 +1,23 @@
-# The match data is licensed for the competition only and must never be committed.
+# Match data: licensed for the competition only, never commit it or anything derived from it.
 data/
 cache/
 tactical/
 broadcast/
 *.mp4
 *.npz
-# private ground truth, if it ever lands here
+
+# Ground truth: the public file comes from the challenge repository; the private one must never land here.
+evaluation/gt/
 *_possession_gt.csv
 *_possession_gt_meta.json
-# scorer output
+
+# Generated output
 evaluation/results/
 evaluation/reports/
 evaluation/scoreboard.csv
-# environment
+docs/TECHNICAL.html
+
+# Python environment
 .venv/
 __pycache__/
 *.py[cod]
-TECHNICAL.html
