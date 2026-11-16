@@ -1,0 +1,19 @@
+# The match data is licensed for the competition only and must never be committed.
+data/
+cache/
+tactical/
+broadcast/
+*.mp4
+*.npz
+# private ground truth, if it ever lands here
+*_possession_gt.csv
+*_possession_gt_meta.json
+# scorer output
+evaluation/results/
+evaluation/reports/
+evaluation/scoreboard.csv
+# environment
+.venv/
+__pycache__/
+*.py[cod]
+TECHNICAL.html

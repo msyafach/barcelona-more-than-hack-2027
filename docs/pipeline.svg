@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 300" font-family="Helvetica, Arial, sans-serif" font-size="13">
+  <rect width="900" height="300" fill="#ffffff"/>
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="#555"/>
+    </marker>
+  </defs>
+  <g fill="#f3f5f8" stroke="#8a96a8">
+    <rect x="20" y="40" width="170" height="56" rx="6"/>
+    <rect x="20" y="122" width="170" height="56" rx="6"/>
+    <rect x="20" y="204" width="170" height="56" rx="6"/>
+    <rect x="260" y="40" width="190" height="56" rx="6"/>
+    <rect x="260" y="122" width="190" height="56" rx="6"/>
+    <rect x="260" y="204" width="190" height="56" rx="6"/>
+    <rect x="520" y="104" width="160" height="92" rx="6"/>
+    <rect x="740" y="122" width="140" height="56" rx="6"/>
+  </g>
+  <g fill="#1d2633" text-anchor="middle">
+    <text x="105" y="64">Tactical tracking</text><text x="105" y="82" fill="#5b6675">players + ball</text>
+    <text x="105" y="146">Smart Tagging</text><text x="105" y="164" fill="#5b6675">set-piece restarts</text>
+    <text x="105" y="228">Pass 1 labels</text><text x="105" y="246" fill="#5b6675">pseudo-labels</text>
+    <text x="355" y="64">Control evidence</text><text x="355" y="82" fill="#5b6675">who is on the ball</text>
+    <text x="355" y="146">Dead-ball evidence</text><text x="355" y="164" fill="#5b6675">walk, out, restart</text>
+    <text x="355" y="228">Team-shape model</text><text x="355" y="246" fill="#5b6675">fills ball gaps</text>
+    <text x="600" y="140">3-state Viterbi</text><text x="600" y="158" fill="#5b6675">H / A / D</text><text x="600" y="176" fill="#5b6675">switch and dead costs</text>
+    <text x="810" y="146">possession.csv</text><text x="810" y="164" fill="#5b6675">199,319 rows</text>
+  </g>
+  <g stroke="#555" stroke-width="1.5" fill="none" marker-end="url(#a)">
+    <path d="M190,68 L258,68"/>
+    <path d="M190,80 L258,140"/>
+    <path d="M190,150 L258,150"/>
+    <path d="M190,232 L258,232"/>
+    <path d="M450,68 L518,130"/>
+    <path d="M450,150 L518,150"/>
+    <path d="M450,232 L518,172"/>
+    <path d="M680,150 L738,150"/>
+  </g>
+</svg>
