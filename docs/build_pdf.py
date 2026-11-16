@@ -35,9 +35,9 @@ TEMPLATE = """<!doctype html>
   code {{ font-family: Consolas, monospace; font-size: 9pt; white-space: nowrap; }}
   pre code {{ white-space: pre; }}
   pre {{ border: 1px solid #000; padding: 6px 8px; overflow-x: auto; }}
-  pre.mermaid svg {{ max-height: 400px; }}
+  pre.mermaid svg {{ max-height: 330px; }}
   pre.mermaid {{ border: none; text-align: center; padding: 0; margin: 10px 0 2px; }}
-  tr, pre, .mermaid {{ page-break-inside: avoid; }}
+  tr, pre, .mermaid, .keep {{ page-break-inside: avoid; break-inside: avoid; }}
   em {{ font-size: 9.5pt; }}
 </style>
 <script src="{mermaid}"></script>
@@ -76,6 +76,12 @@ def to_html(md_text):
     for i, src in enumerate(blocks):
         body = body.replace("<p>MERMAIDBLOCK{}</p>".format(i),
                             '<pre class="mermaid">{}</pre>'.format(html.escape(src)))
+    # Keep each heading on the same page as the block after it, and a figure with its caption.
+    # Chrome's print engine ignores break-after: avoid, so the pairs are wrapped instead.
+    body = re.sub(r"(<h2>.*?</h2>\s*<(p|table|ul|pre)\b.*?</\2>)",
+                  r'<div class="keep">\1</div>', body, flags=re.S)
+    body = re.sub(r'(<pre class="mermaid">.*?</pre>\s*<p><em>.*?</em></p>)',
+                  r'<div class="keep">\1</div>', body, flags=re.S)
     title = re.search(r"^# (.+)$", md_text, flags=re.M).group(1)
     return TEMPLATE.format(title=html.escape(title), mermaid=MERMAID, body=body)
 
