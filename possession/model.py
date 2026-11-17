@@ -158,6 +158,12 @@ def restart_frames(events, p):
     return sorted(e["start"] + off for e in events if e["code"] == "SET PIECES")
 
 
+def kickoff_tags(events):
+    """Video frames where Smart Tagging opens a 'Kick Off (Start)' set piece, one per half."""
+    return sorted(e["start"] for e in events
+                  if e["code"] == "SET PIECES" and e["type"].startswith("kick off (start)"))
+
+
 def viterbi(emis, switch_cost, dead_cost, start=None):
     """emis: (n, 3) log-scores. Returns best state path. start: forced first state or None."""
     n = len(emis)
@@ -225,6 +231,15 @@ def label(f, halves, events=(), params=None, use_team_priors=False, team_prior_w
         prior = team_priors(events, n, team_prior_weight)
         emis[:, H] += prior[:, H] - prior[:, A]
         emis[:, A] += prior[:, A] - prior[:, H]
+
+    # Nothing is in play before a half kicks off. Until Smart Tagging opens that half's kick-off
+    # set piece, the only allowed state is D: players warming up or walking to their positions
+    # near the ball are not a possession.
+    kickoffs = kickoff_tags(events) if events else []
+    for _, first, last in halves:
+        for k in kickoffs:
+            if first < k <= last:
+                emis[first:k, H] = emis[first:k, A] = -1e9
 
     out = np.full(n, "X", dtype="<U1")
     for _, first, last in halves:

@@ -84,11 +84,12 @@ We used the public five minutes to check that the pipeline did what we thought: 
 
 A logistic regression on these gets 84 to 86% right on the half it wasn't trained on. Always guessing the team that has more of the ball would get 62 to 68%. Neighbouring frames are almost identical, so we turn its voice down a lot (weight 0.05 per frame). That way it can only cause a switch inside a gap if the shape keeps saying the same thing for several seconds. It is only used on frames where the ball gives no control evidence.
 
-**Dead ball.** Four signals point to a stoppage:
+**Dead ball.** Five signals point to a stoppage:
 
 - everyone is walking: average player speed under 1.4 m/s (smoothed over 2 s), as long as nobody has played a pass-speed ball (over 6 m/s) in the last half second;
 - the ball is over a line;
 - the ball has gone out and hasn't come back yet. We count from the moment it leaves the pitch until it is next seen inside the lines moving at pass speed, for at most 45 s. This covers throw-ins, corners, goal kicks and goals, because the tracker often loses the ball while it is out;
+- the half hasn't kicked off yet: every frame before Smart Tagging's "Kick Off (Start)" tag for that half is dead, with no exceptions. The second half is graded from 2,934 frames before its kick-off, and without this rule players gathering near the ball there produced a 12-second possession that never happened;
 - a set piece is about to be taken: the 8 s before each restart in the Smart Tagging. We place the restart 4 s after the tag starts. Both kick-offs come 3.4 s after their tags, and across all set-piece tags the players are slowest about 4 s in.
 
 Being close to the ball does not count as evidence that it's live. Someone standing over a free kick is "in control" too, and that was exactly the bug in our first version.
@@ -104,7 +105,8 @@ Being close to the ball does not count as evidence that it's live. Someone stand
 | v2 | standing near a dead ball no longer counts as play; pass check over a short window | 0.838 | 0.447 | 273 | 0.788 |
 | v3 | sliding-scale control | 0.846 | 0.471 | 328 | 0.765 |
 | v4 | team-shape model | 0.874 | 0.518 | 342 | 0.787 |
-| v5 (submitted) | ball stays dead until the restart | 0.874 | 0.518 | 338 | 0.792 |
+| v5 | ball stays dead until the restart | 0.874 | 0.518 | 338 | 0.792 |
+| v6 (submitted) | nothing in play before a half's kick-off | 0.874 | 0.518 | 334 | 0.797 |
 
 The public columns sit inside the noise band, so read them as "the pipeline works", not as a ranking. To choose between versions we used three checks on the whole match that need no ground truth (`possession/proxy_eval.py`):
 
@@ -112,7 +114,7 @@ The public columns sit inside the noise band, so read them as "the pipeline work
 - how many possessions we report, and how long they last;
 - how much of the match we call dead.
 
-The submitted file has 338 possessions averaging 10.4 s. We call the ball dead on 44.6% of graded frames, which fits with effective playing time in LaLiga being only a little over half the match. Barcelona have 63% of the live-ball time.
+The submitted file has 334 possessions averaging 10.5 s. We call the ball dead on 44.7% of graded frames, which fits with effective playing time in LaLiga being only a little over half the match. Barcelona have 62% of the live-ball time.
 
 We also checked how fragile it is. Moving the switching cost, the stoppage cost, the control radius or the shape weight by about 50% changes at most 2% of graded frames. The walking-speed threshold is the one to watch: between 1.2 and 1.6 m/s, the share of the match we call dead goes from 37% to 50%.
 
@@ -125,7 +127,7 @@ We also checked how fragile it is. Moving the switching cost, the stoppage cost,
 - it filled only 9% of the graded frames where the tactical ball was missing, because both cameras lose the ball in the same situations;
 - where both had a ball, they disagreed by more than 5 m on 10% of frames.
 
-Adding it changed none of our checks and pushed the possession count from 338 to 356, so it is off by default (`--broadcast` turns it on).
+Adding it changed none of our checks and pushed the possession count from 334 to 356, so it is off by default (`--broadcast` turns it on).
 
 ## 7. Limitations
 

@@ -7,7 +7,7 @@ Our entry for Phase 1 of More than a Hack 2027: for every frame of FC Barcelona 
 ## Features
 - **Possessions, not flickers.** The match is modelled as three states (H, A, D) and decoded with Viterbi. Switching teams has a cost, so a touch, a deflection or a ball flying past someone doesn't start a new possession.
 - **Control that tolerates noisy tracking.** The tracked ball wobbles by about a metre, so instead of a hard distance cut-off we use a sliding scale: full credit within 1 m of the ball, nothing beyond 3 m, weighted by how much closer one team is than the other.
-- **Knows when the ball is dead.** It looks for the whole field walking, the ball going over a line (and staying dead until the restart), and the set pieces flagged by Metrica's automatic Smart Tagging.
+- **Knows when the ball is dead.** It looks for the whole field walking, the ball going over a line (and staying dead until the restart), nothing being in play before a half kicks off, and the set pieces flagged by Metrica's automatic Smart Tagging.
 - **Copes with the missing ball.** The ball isn't tracked on 41% of graded frames. For those stretches a small model reads the shape of the two teams instead. It learns only from the pipeline's own confident frames, never from human labels.
 - **Same file every time.** Run it twice and you get a byte-identical `possession.csv`.
 - **Checked with the official tools.** The organisers' scorer and validator are included so you can test the output locally.
@@ -73,12 +73,12 @@ Two things to keep in mind when reading them:
 |---|---|
 | rows | 199,319 |
 | graded frames (the two halves) | 158,857 |
-| H / A / D on graded frames | 55,256 / 32,792 / 70,809 |
+| H / A / D on graded frames | 54,448 / 33,426 / 70,983 |
 | X (only before kick-off, at half-time and after the final whistle) | 40,462 |
-| possessions | 338 |
-| average possession length | 10.4 s |
-| share of graded frames with the ball dead | 44.6% |
-| Barcelona's share of live-ball time | 62.8% |
+| possessions | 334 |
+| average possession length | 10.5 s |
+| share of graded frames with the ball dead | 44.7% |
+| Barcelona's share of live-ball time | 62.0% |
 
 ### 2. How the team-shape model trained
 
@@ -86,19 +86,19 @@ It's a logistic regression that guesses which team has the ball from how the pla
 
 | used on | training frames | test frames | test accuracy | always guessing the team with more of the ball | gain |
 |---|---|---|---|---|---|
-| first half | 15,208 | 16,382 | 86.1% | 67.5% | +18.6 points |
-| second half | 16,382 | 15,208 | 83.9% | 62.0% | +21.9 points |
+| first half | 15,150 | 16,382 | 85.9% | 67.5% | +18.4 points |
+| second half | 16,382 | 15,150 | 84.1% | 61.8% | +22.3 points |
 
 What it learned (standardised weights; positive means "looks like Barcelona has the ball"):
 
 | feature | model for the first half | model for the second half |
 |---|---|---|
-| width difference (Barcelona minus Athletic) | +1.340 | +1.614 |
-| depth difference (Barcelona minus Athletic) | +0.346 | +0.203 |
-| how far the whole block sits toward Athletic's goal | -0.183 | -0.035 |
-| how fast the block moves toward Athletic's goal | +0.519 | +0.205 |
-| average speed difference (Barcelona minus Athletic) | -0.712 | -0.484 |
-| intercept | +0.712 | +1.121 |
+| width difference (Barcelona minus Athletic) | +1.417 | +1.614 |
+| depth difference (Barcelona minus Athletic) | +0.157 | +0.203 |
+| how far the whole block sits toward Athletic's goal | -0.035 | -0.035 |
+| how fast the block moves toward Athletic's goal | +0.496 | +0.205 |
+| average speed difference (Barcelona minus Athletic) | -0.734 | -0.484 |
+| intercept | +0.707 | +1.121 |
 
 The biggest signal by far is width: the team with the ball spreads out. Both halves learned the same signs, which suggests it's picking up something real about the game rather than memorising one half.
 
@@ -106,9 +106,9 @@ The biggest signal by far is width: the team with the ball spreads out. Both hal
 
 | version | agrees with Smart Tagging's attacking team | possessions | average length | ball dead |
 |---|---|---|---|---|
-| submission | 0.792 | 338 | 10.4 s | 44.6% |
-| without the team-shape model | 0.776 | 326 | 10.8 s | 44.7% |
-| with Smart Tagging team priors (dropped) | 0.857 | 324 | 11.0 s | 44.2% |
+| submission | 0.797 | 334 | 10.5 s | 44.7% |
+| without the team-shape model | 0.776 | 325 | 10.7 s | 45.0% |
+| with Smart Tagging team priors (dropped) | 0.856 | 323 | 10.9 s | 44.4% |
 
 The last row looks best, but don't be fooled: that version feeds on the same Smart Tagging tags this check compares against, so it's grading its own homework.
 
@@ -116,17 +116,17 @@ The last row looks best, but don't be fooled: that version feeds on the same Sma
 
 | version | macroF1 | spellF1 | spellF1, 90% range | possessions (truth: 17) | live/dead F1 | right team |
 |---|---|---|---|---|---|---|
-| submission | 0.8740 | 0.5176 | 0.34 to 0.68 | 17 | 0.9642 | 0.9030 |
+| submission | 0.8738 | 0.5176 | 0.34 to 0.68 | 17 | 0.9641 | 0.9030 |
 | without the team-shape model | 0.8462 | 0.4706 | 0.31 to 0.64 | 17 | 0.9648 | 0.8594 |
-| with Smart Tagging team priors (dropped) | 0.8453 | 0.4588 | 0.29 to 0.62 | 17 | 0.9663 | 0.8748 |
+| with Smart Tagging team priors (dropped) | 0.8451 | 0.4588 | 0.29 to 0.62 | 17 | 0.9662 | 0.8748 |
 
 How the submission does on each label:
 
 | label | precision | recall | F1 | frames |
 |---|---|---|---|---|
 | H | 0.8803 | 0.8900 | 0.8851 | 3,454 |
-| A | 0.8724 | 0.9205 | 0.8958 | 2,577 |
-| D | 0.8999 | 0.7897 | 0.8412 | 1,469 |
+| A | 0.8721 | 0.9205 | 0.8956 | 2,577 |
+| D | 0.8998 | 0.7890 | 0.8408 | 1,469 |
 
 Where the mistakes go (rows are the truth, columns what we said):
 
@@ -134,7 +134,7 @@ Where the mistakes go (rows are the truth, columns what we said):
 |---|---|---|---|
 | H | 3,074 | 273 | 107 |
 | A | 183 | 2,372 | 22 |
-| D | 235 | 74 | 1,160 |
+| D | 235 | 75 | 1,159 |
 
 spellF1 at each overlap threshold:
 
@@ -162,7 +162,8 @@ Each version builds on the one before. The organisers' baseline is the bar to cl
 | v2 | standing near a dead ball no longer counts as play; pass check over a short window | 0.8380 | 0.4471 | 273 | 0.788 |
 | v3 | sliding-scale control (full at 1 m, none at 3 m) | 0.8462 | 0.4706 | 328 | 0.765 |
 | v4 | team-shape model for ball gaps | 0.8738 | 0.5176 | 342 | 0.787 |
-| v5 (submitted) | ball stays dead from leaving the pitch until the restart | 0.8740 | 0.5176 | 338 | 0.792 |
+| v5 | ball stays dead from leaving the pitch until the restart | 0.8740 | 0.5176 | 338 | 0.792 |
+| v6 (submitted) | nothing is in play before a half's kick-off tag (removes a 12 s phantom possession before the second half) | 0.8738 | 0.5176 | 334 | 0.797 |
 
 On the full match, the organisers' baseline scores spellF1 0.2433. That's the published floor.
 
@@ -172,13 +173,13 @@ We nudged each main setting by roughly half its value to see whether the result 
 
 | setting | default | tried | frames changed | possessions |
 |---|---|---|---|---|
-| cost of switching teams | 10 | 6 / 15 | 0.9% / 1.8% | 399 / 270 |
-| cost of entering or leaving a stoppage | 25 | 15 / 40 | 1.6% / 1.4% | 349 / 328 |
-| distance where control fades out | 3.0 m | 2.5 m | 1.0% | 306 |
-| weight of the team-shape model | 0.05 | 0.02 / 0.10 | 1.6% / 1.3% | 328 / 344 |
-| walking-speed threshold | 1.4 m/s | 1.2 / 1.6 m/s | 8.6% / 6.0% | 349 / 325 |
+| cost of switching teams | 10 | 6 / 15 | 1.2% / 1.5% | 397 / 269 |
+| cost of entering or leaving a stoppage | 25 | 15 / 40 | 1.5% / 0.9% | 346 / 328 |
+| distance where control fades out | 3.0 m | 2.5 m | 0.8% | 303 |
+| weight of the team-shape model | 0.05 | 0.02 / 0.10 | 1.5% / 1.4% | 327 / 341 |
+| walking-speed threshold | 1.4 m/s | 1.2 / 1.6 m/s | 7.8% / 5.9% | 342 / 325 |
 
-The one to watch is the walking-speed threshold. Between 1.2 and 1.6 m/s, the share of the match we call dead moves from 37% to 50%.
+The one to watch is the walking-speed threshold. Between 1.2 and 1.6 m/s, the share of the match we call dead moves from 37.5% to 50%.
 
 ## Repository layout
 ```
